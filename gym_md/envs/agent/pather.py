@@ -1,6 +1,7 @@
 """path module.
 
 エージェントのGrid内における移動計算モジュール
+Calculation module for movement of agents in Grid
 
 """
 
@@ -25,9 +26,12 @@ class Pather:
 
     def get_moveinfo(self, y: int, x: int, safe: bool) -> MoveInfo:
         """safeの移動方法で次に進む座標の辞書を返す.
+        Returns a dictionary of coordinates to move to next in the safe movement method
 
         座標(y, x)においてsafeのような移動をするときに
         次に進むべき座標の辞書を返す
+        When doing a safe-like move at coordinates (y, x)
+        return a dictionary of coordinates to go to next
 
         Parameters
         ----------
@@ -39,6 +43,7 @@ class Pather:
         -------
         move_info: dict of (str, (int, int))
             最も近い各タイルまで向かうために，次に進むべき1マスの座標の辞書
+            Dictionary of coordinates of the next square to go to for each nearest tile
         """
         dist_and_prev: Final[
             Tuple[List[List[int]], List[List[Point]]]
@@ -53,6 +58,7 @@ class Pather:
         self, y: int, x: int, prev: List[List[Point]], nearest_info: Dict[str, Point]
     ) -> MoveInfo:
         """座標(y, x)から各タイプのタイルに１マス進む座標の辞書を返す.
+        Returns a dictionary of coordinates that advance one square for each type of tile from coordinates (y, x)
 
         Parameters
         ----------
@@ -65,16 +71,19 @@ class Pather:
         -------
         move_info: dict of (str, (int, int))
             最も近い各タイルまで向かうために，次に進むべき1マスの座標の辞書
+            dictionary of coordinates of the next square to go to for each nearest tile
         """
         move_info: Final[MoveInfo] = {c: (-1, -1) for c in self.setting.GRID_CHARACTERS}
 
         for gtype, pos in nearest_info.items():
             # gtypeのタイルが存在しない
+            # gtype tile does not exist
             if pos == (-1, -1):
                 continue
             py, px = pos
 
             # 今の(y, x)のマス
+            # current (y, x) cell
             if py == y and px == x:
                 continue
 
@@ -91,6 +100,7 @@ class Pather:
         self, y: int, x: int, safe: bool
     ) -> Tuple[List[List[int]], List[List[Point]]]:
         """座標(y, x)を初期位置としたときの他のマスまでの距離と前のマスを計算する.
+        Calculate the distance to another square and the previous square when the coordinates (y, x) are the initial position
 
         Parameters
         ----------
@@ -138,16 +148,19 @@ class Pather:
 
     def get_nearest_distance(self, dist: List[List[int]]) -> Dict[str, int]:
         """ある座標(y, x)から種類zのタイルまで最も近い距離d{d:(a,b)}を返す.
+        Returns the closest distance d{d:(a,b)} from some coordinate (y, x) to a tile of kind z
 
         Parameters
         ----------
         dist: list of list of int
             各マスまでの距離
+            Distance to each square
 
         Returns
         -------
         dict of tuple of (str, int)
             あるタイルの種類zまでの最も近い距離
+            closest distance to some tile type z
         """
         dist_info: Final[Dict[str, int]] = {
             c: self.setting.DISTANCE_INF for c in self.setting.GRID_CHARACTERS
@@ -160,16 +173,19 @@ class Pather:
 
     def _get_nearest_info(self, dist: List[List[int]]) -> Dict[str, Point]:
         """ある座標(y, x)から種類zのタイルまでの最も近い位置を格納する{z:(a, b)}を返す.
+        Returns {z:(a, b)} storing the closest position from some coordinate (y, x) to a tile of kind z
 
         Parameters
         ----------
         dist: list of list of int
             各マスまでの距離
+            Distance to each square
 
         Returns
         -------
         nearest_info: dict of tuple of (str, (int, int))
             初期位置から特定のタイルまでに最も近い位置を計算した辞書
+            A dictionary that computes the closest positions from the initial position to a specific tile
 
         """
         nearest_info: Final[Dict[str, Point]] = {

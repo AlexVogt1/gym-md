@@ -386,3 +386,10 @@ class ConstantHolmgardLarge10MdEnv(MdEnvBase):
     def __init__(self):
         stage_name: Final[str] = "ConstantHolmgardLarge_10"
         super(ConstantHolmgardLarge10MdEnv, self).__init__(stage_name=stage_name)
+
+class Policy0MdEnv(MdEnvBase):
+    """PolicyMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_0"
+        super(Policy0MdEnv, self).__init__(stage_name=stage_name)

@@ -3,6 +3,7 @@
 使用したいEnvをインポートする．
 """
 from gym_md.envs.md_env_list import (
+    Policy0MdEnv,
     Check1MdEnv,
     Check2MdEnv,
     Check3MdEnv,

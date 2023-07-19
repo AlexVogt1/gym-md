@@ -13,7 +13,7 @@ from gym_md.envs.grid import Grid
 from gym_md.envs.renderer.renderer import Renderer
 from gym_md.envs.setting import Setting
 
-
+#TODO start of env does not have the player in satting pos
 class MdEnvBase(gym.Env):
     """gym-mdの基底クラス.
 
@@ -33,13 +33,14 @@ class MdEnvBase(gym.Env):
         self.info: DefaultDict[str, int] = defaultdict(int)
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(7,))
         self.observation_space = gym.spaces.Box(
-            low=0, high=self.setting.DISTANCE_INF, shape=(8,), dtype=numpy.int32
+            low=0, high=self.setting.DISTANCE_INF, shape=(8,), dtype=numpy.int32 # original shape=(8,) dtype=numpy.int32
         )
 
     def reset(self) -> List[int]:
         """環境をリセットする."""
         self.grid.reset()
         self.agent.reset()
+        self._update_grid() #update grid to include the players staring postion
         self.info = defaultdict(int)
         return self._get_observation()
 
@@ -69,9 +70,10 @@ class MdEnvBase(gym.Env):
         reward: int = self._get_reward()
         done: bool = self._is_done()
         observation: List[int] = self._get_observation()
+        # grid_observation= self._get_grid_observation
         self.info = self._get_info(self.info, action)
         self._update_grid()
-        return observation, reward, done, self.info
+        return action, observation,  reward, done, self.info
 
     def render(self, mode="human") -> Image:
         """画像の描画を行う.
@@ -88,10 +90,11 @@ class MdEnvBase(gym.Env):
 
     def generate(self, mode="human") -> Image:
         """画像を生成する.
-
+        generate the image
         Notes
         -----
         画像の保存などの処理はgym外で行う.
+        Processing such as saving images is done outside gym
 
         Returns
         -------
@@ -168,7 +171,7 @@ class MdEnvBase(gym.Env):
 
         Notes
         -----
-        内部で情報を**更新しない**ことに注意．
+        内部で情報を**更新しない**ことに注意．Note that we **do not** update the information internally
 
         Returns
         -------
@@ -180,13 +183,14 @@ class MdEnvBase(gym.Env):
         return info
 
     def _get_observation(self) -> List[int]:
-        """環境の観測を取得する.
+        """環境の観測を取得する. Get environment observations
 
         Returns
         -------
         list of int
-            エージェントにわたす距離の配列 (len: 8)
+            エージェントにわたす距離の配列 (len: 8) an array of distances to pass to the agent
         """
+        C = self.setting.CHARACTER_TO_NUM
         sd, _ = self.agent.path.get_distance_and_prev(
             y=self.agent.y, x=self.agent.x, safe=True
         )
@@ -204,6 +208,7 @@ class MdEnvBase(gym.Env):
             ud["E"],
             sd["E"],
             self.agent.hp,
+            # self.grid.g
         ]
         return numpy.array(ret, dtype=numpy.int32)
 
@@ -222,11 +227,13 @@ class MdEnvBase(gym.Env):
         # return False
 
     def _update_grid(self) -> None:
-        """グリッドの状態を更新する.
+        """グリッドの状態を更新する. Update grid state
 
         Notes
         -----
         メソッド内でグリッドの状態を**直接更新している**ことに注意．
+        - Note that we are **directly updating** the state of the grid in the method.
+        - Added functionality of keeping track of the
 
         Returns
         -------
@@ -236,5 +243,19 @@ class MdEnvBase(gym.Env):
         C = self.setting.CHARACTER_TO_NUM
         if self.agent.hp <= 0:
             return
-        if self.grid[y, x] in [C["P"], C["M"], C["T"]]:
-            self.grid[y, x] = C["."]
+        
+        if self.grid[y, x] in [C["P"], C["M"], C["T"], C["."]]:
+            self.grid[y, x] = C["S"]
+        
+        # replace players previours positions with emppy spot
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # y-1, y+1, x-1, x+1
+
+        # loop over directions and if any are theplayers previurs positions replace with an empy spot
+        for direction in directions:
+            try:
+                ny, nx = y + direction[0], x + direction[1]
+                if self.grid[ny, nx] == C["S"]:
+                    self.grid[ny, nx] = C["."]
+            except IndexError:
+                pass
+

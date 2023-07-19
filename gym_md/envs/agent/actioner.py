@@ -14,6 +14,8 @@ class Actioner:
     アクションの配列を受け取り
     実行するアクションを決定する
 
+    Receive an array of actions
+    Decide what action to take
     """
 
     def __init__(self, setting: Setting, random: Random):
@@ -24,24 +26,30 @@ class Actioner:
         self, actions: Actions, safe_info: MoveInfo, unsafe_info: MoveInfo
     ) -> str:
         """実行するアクションのIDを決定する.
+        Determine the ID of the action to perform
 
         Notes
         -----
         同じ選択希望値の場合は，ランダムに選択する．
+        In the case of the same selection desired value, select randomly.
 
         Parameters
         ----------
         actions: Actions
             エージェントが出力した各アクションの希望値
+            Desired value for each action output by the agent
         safe_info: MoveInfo
             各タイルに移動するための次の座標の辞書
+            Dictionary of next coordinates to go to each tile
         unsafe_info
             各タイルに移動するための次の座標の辞書
+            Dictionary of next coordinates to go to each tile
 
         Returns
         -------
         str
             実行するアクションのID
+            ID of the action to perform
         """
         actions_idx: List[Tuple[float, int]] = [
             (actions[i], i) for i in range(len(actions))
@@ -64,10 +72,12 @@ class Actioner:
                     to = unsafe_info[action_name[0]]
 
                 # action_nameを実行できない
+                # unable to execute action_name
                 if to == (-1, -1):
                     continue
 
                 # 実行するアクション文字列
+                # the action string to perform
                 return self.setting.NUM_TO_ACTION[action_id]
 
             i = j

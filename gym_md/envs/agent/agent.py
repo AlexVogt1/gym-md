@@ -30,11 +30,15 @@ class Agent:
 
     def reset(self) -> None:
         """エージェントの初期化をする.
+        Reset/Initialize the agent
 
         Notes
         -----
         リセット形式にしている．
         これは，一回一回Agentインスタンスを作ると，rendererなどの参照とずれてしまうため
+        - in reset format
+        - This is because if you create an Agent instance once, it will be misaligned with references such as renderer
+
         """
         self.hp = self.setting.PLAYER_MAX_HP
         init_pos: Final[Point] = self._init_player_pos()
@@ -43,14 +47,18 @@ class Agent:
 
     def select_action(self, actions: Actions) -> str:
         """行動を選択する.
-
+        Choose an action
         Notes
         -----
         行動を選択したときに，その行動が実行できない可能性がある．
         （マスがない可能性など）
+        - When an action is selected, there is a possibility that the action cannot be executed
+        (possibility that there are no squares, etc.)
 
         そのため，行動列すべてを受け取りできるだけ値の大きい実行できるものを選択する．
         **選択する**であり何も影響を及ぼさないことに注意．
+        -Therefore, we select the one that can be executed with a large value as long as it can receive all the action sequences.
+        Note that it **selects** and has no effect.
 
         Parameters
         ----------
@@ -61,6 +69,7 @@ class Agent:
         -------
         str
             選択した行動IDを返す
+            Returns the selected action id
         """
         safe_info: Final[MoveInfo] = self.path.get_moveinfo(
             y=self.y, x=self.x, safe=True
@@ -75,19 +84,25 @@ class Agent:
 
     def take_action(self, action: str) -> None:
         """選択された行動を実行する.
+        Perform the selected action
 
         - 移動を行う
         - 体力の増減が実行される
+        - make a move
+        - Physical strength increase/decrease is executed (hp)
 
         Notes
         -----
         エージェントの自身の更新は行うが
         Gridなどの更新は行わないことに注意する．
+        Although the agent updates itself
+        Note that it does not update Grid etc.
 
         Parameters
         ----------
         action: str
             選択済み行動ID
+            Selected action ID
         """
         safe_info: Final[MoveInfo] = self.path.get_moveinfo(
             y=self.y, x=self.x, safe=True
@@ -112,8 +127,10 @@ class Agent:
 
     def be_influenced(self, y: int, x: int) -> None:
         """移動したプレイヤーに影響を与える.
+        Affect moved players
 
         体力の増減を行う
+        Increase/decrease health
 
         Parameters
         ----------
@@ -140,16 +157,18 @@ class Agent:
 
     def _init_player_pos(self) -> Point:
         """プレイヤーの座標を初期化して座標を返す.
-
+        Initialize the player's coordinates and return the coordinates.
+        
         Notes
         -----
         初期座標を表すSを'.'にメソッド内で書き換えていることに注意する．
+        Note that S representing the initial coordinates is rewritten to '.' in the method
 
         Returns
         -------
         Point
             初期座標を返す
-
+            return the initial coordinates
         """
         for i in range(self.grid.H):
             for j in range(self.grid.W):
