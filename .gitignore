@@ -258,6 +258,6 @@ dump/
 TEMP/
 
 # exclude zip files
-.zip
-.csv
-.pth
+*.zip
+*.csv
+*.pth

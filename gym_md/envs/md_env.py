@@ -73,7 +73,7 @@ class MdEnvBase(gym.Env):
         # grid_observation= self._get_grid_observation
         self.info = self._get_info(self.info, action)
         self._update_grid()
-        return action, observation,  reward, done, self.info
+        return observation,  reward, done, self.info
 
     def render(self, mode="human") -> Image:
         """画像の描画を行う.
@@ -178,6 +178,7 @@ class MdEnvBase(gym.Env):
         defaultdict of (str, int)
         """
         y, x = self.agent.y, self.agent.x
+        info["action_taken"] = action
         info[action] += 1
         info[self.setting.NUM_TO_CHARACTER[self.grid[y, x]]] += 1
         return info

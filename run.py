@@ -70,11 +70,11 @@ for lvl in levels:
                 # actions = [random.random() for _ in range(7)]
                 
                 actions = play_styles[playstyle]
-                action,observation, reward, done, info = env.step(actions)
+                observation, reward, done, info = env.step(actions)
                 # print(np.array(env.grid.g).shape)
                 reward_sum += reward
                 grid= np.array(env.grid.g)
-                data.append([lvl, _, i, env.agent.x, env.agent.y, grid, play_style, action, observation, done, reward, dict(info),grid.shape[0],grid.shape[1]])
+                data.append([lvl, _, i, env.agent.x, env.agent.y, grid, play_style, info.action_taken, observation, done, reward, dict(info),grid.shape[0],grid.shape[1]])
                 if done:
                     # env.render()
                     break
