@@ -8,6 +8,10 @@ from gym.envs.registration import register
 getLogger(__name__).addHandler(NullHandler())
 
 register(
+    id="md-simple_0-v0",
+    entry_point="gym_md.envs:Simple0MdEnv",
+)
+register(
     id="md-policy_0-v0",
     entry_point="gym_md.envs:Policy0MdEnv",
 )

@@ -3,7 +3,6 @@
 使用したいEnvをインポートする．
 """
 from gym_md.envs.md_env_list import (
-    Policy0MdEnv,
     Check1MdEnv,
     Check2MdEnv,
     Check3MdEnv,
@@ -53,4 +52,6 @@ from gym_md.envs.md_env_list import (
     ConstantHolmgardLarge8MdEnv,
     ConstantHolmgardLarge9MdEnv,
     ConstantHolmgardLarge10MdEnv,
+    Policy0MdEnv,
+    Simple0MdEnv,
 )

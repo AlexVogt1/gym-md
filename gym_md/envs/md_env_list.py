@@ -393,3 +393,10 @@ class Policy0MdEnv(MdEnvBase):
     def __init__(self):
         stage_name: Final[str] = "policy_0"
         super(Policy0MdEnv, self).__init__(stage_name=stage_name)
+
+class Simple0MdEnv(MdEnvBase):
+    """SimpleMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "simple_0"
+        super(Simple0MdEnv, self).__init__(stage_name=stage_name)
