@@ -12,6 +12,8 @@ from stable_baselines3.common.results_plotter import load_results, ts2xy, plot_r
 from stable_baselines3.common.callbacks import BaseCallback
 import wandb
 
+def get_reward_scheme(type):
+    return
 
 
 def parse_args():
