@@ -8,41 +8,123 @@ import argparse
 from stable_baselines3 import PPO  
 from stable_baselines3.common import results_plotter
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.results_plotter import load_results, ts2xy, plot_results
-from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 import wandb
+from wandb.integration.sb3 import WandbCallback
+import warnings
+warnings.filterwarnings("ignore")
+#TODO add resume training from last best model functionality
 
 def get_reward_scheme(type):
-    return
-
+    rewards  ={}
+    if type == "treasure_safe":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 1,
+            "TREASURE":10,
+            "POTION": 2,
+            "DEAD": -20
+        }
+        return rewards
+    elif type == "treasure_risky":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 1,
+            "TREASURE":20,
+            "POTION": 1,
+            "DEAD": -10
+        }
+        return rewards
+    elif type == "killer_safe":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 10,
+            "TREASURE":1,
+            "POTION": 9,
+            "DEAD": -30
+        }
+        return rewards
+    elif type == "killer_risky":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 20,
+            "TREASURE":1,
+            "POTION": 2,
+            "DEAD": -10
+        }
+        return rewards
+    elif type == "runner_safe":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 15,
+            "KILL": 1,
+            "TREASURE":2,
+            "POTION": 3,
+            "DEAD": -10
+        }
+        return rewards
+    elif type == "runner_risky":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 30,
+            "KILL": 1,
+            "TREASURE":1,
+            "POTION": 1,
+            "DEAD": -5
+        }
+        return rewards
+    elif type == "clearer_safe":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 15,
+            "TREASURE":18,
+            "POTION": 20,
+            "DEAD": -15
+        }
+        return rewards
+    elif type == "clearer_risky":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 18,
+            "TREASURE":20,
+            "POTION": 20,
+            "DEAD": -5
+        }
+        return rewards
+    else :
+        return 
 
 def parse_args():
     parser = argparse.ArgumentParser("PPO for MiniDungeons (gym-md)")
     parser.add_argument("--seed", type=int, default=0, help="which seed to use")
     # Environment
-    parser.add_argument("--env", type=str, default="md-simple_0-v0", help="name of the game")
+    parser.add_argument("--env", type=str, default="hard", help="name of the game")
     # Play-style to train (i.e. which reward scheme to use)
     parser.add_argument("--play_style", type=str, default="optimal", help= "what type of player are you wanting to train")
     parser.add_argument("--reward_scheme", type=str, default="original", help= "what reward scheme are you using for training")
-    
-    
-    # # Core PPO parameters
-    # parser.add_argument("--max_ep_len", type=int, default=250, help= "max number of steps allod in single episode")
-    # parser.add_argument("--max_training_timesteps", type=int, default=int(3e6), help= "max number of steps for training")
-    # parser.add_argument("--k_epochs", type=int, default=80, help= "what k_epochs")
-    # parser.add_argument("--eps_clip", type=float, default=0.2, help= "clipping factor")
-    # parser.add_argument("--gamma", type=float, default=0.99, help= "gamma value for optimizer")
-    # parser.add_argument("--lr_actor", type=float, default=0.0003, help= "learning rate for actor")
-    # parser.add_argument("--lr_critic", type=float, default=0.001, help= "learning rate for actor")
-    # parser.add_argument("--action_std", type=float, default=0.6, help= "learning rate for actor")
-    # parser.add_argument("--action_std_decay_rate", type=float, default=0.05, help= "learning rate for actor")
-    # parser.add_argument("--min_action_std", type=float, default=0.1, help= "learning rate for actor")
-    # parser.add_argument("--action_std_decay_freq", type=int, default=int(2.5e5), help= "learning rate for actor")
-    # #Logging and Reporing
-    # parser.add_argument("--print_freq", type=int, default=500, help= "printing frequency")
-    # parser.add_argument("--log_freq", type=int, default=500, help= "logging frequency")
-    # parser.add_argument("--save_model_freq", type=int, default=int(1e5), help= "frequency for saving model")
+    parser.add_argument("--exp_type", type=str, default="test", help= "what type of experiment are you running")
+    # parser.add_argument("--resume", type=str, default=, help= "what type of experiment are you running")
+
     return parser.parse_args()
+
+def uniquify(path, x=0):
+    while True:
+        dir_name = (path + ('_' + str(x) if x is not 0 else '')).strip()
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+            print(dir_name)
+            return dir_name
+        else:
+            x = x + 1
+
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
@@ -58,7 +140,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
-        self.save_path = os.path.join(log_dir, 'best_model')
+        self.save_path = os.path.join(log_dir, 'best_mode')
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
@@ -74,7 +156,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
           if len(x) > 0:
               # Mean training reward over the last 100 episodes
               mean_reward = np.mean(y[-100:])
-              if self.verbose > 0:
+              if len(x)>100:
                 print("Num timesteps: {}".format(self.num_timesteps))
                 print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))
 
@@ -82,51 +164,39 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
               if mean_reward > self.best_mean_reward:
                   self.best_mean_reward = mean_reward
                   # Example for saving best model
-                  if self.verbose > 0:
+                  if len(x) >100:
                     print("Saving new best model to {}".format(self.save_path))
                   self.model.save(self.save_path)
 
         return True
 
-# def parse_args():
-#     parser = argparse.ArgumentParser("PPO for MiniDungeons (gym-md)")
-#     parser.add_argument("--seed", type=int, default=0, help="which seed to use")
-#     # Environment
-#     parser.add_argument("--env", type=str, default="md-simple_0-v0", help="name of the game")
-#     # Play-style to train (i.e. which reward scheme to use)
-#     parser.add_argument("--play_style", type=str, default="optimal", help= "what type of player are you wanting to train")
-#     parser.add_argument("--reward_scheme", type=str, default="original", help= "what reward scheme are you using for training")
-    
-    
-#     # # Core PPO parameters
-#     # parser.add_argument("--max_ep_len", type=int, default=250, help= "max number of steps allod in single episode")
-#     # parser.add_argument("--max_training_timesteps", type=int, default=int(3e6), help= "max number of steps for training")
-#     # parser.add_argument("--k_epochs", type=int, default=80, help= "what k_epochs")
-#     # parser.add_argument("--eps_clip", type=float, default=0.2, help= "clipping factor")
-#     # parser.add_argument("--gamma", type=float, default=0.99, help= "gamma value for optimizer")
-#     # parser.add_argument("--lr_actor", type=float, default=0.0003, help= "learning rate for actor")
-#     # parser.add_argument("--lr_critic", type=float, default=0.001, help= "learning rate for actor")
-#     # parser.add_argument("--action_std", type=float, default=0.6, help= "learning rate for actor")
-#     # parser.add_argument("--action_std_decay_rate", type=float, default=0.05, help= "learning rate for actor")
-#     # parser.add_argument("--min_action_std", type=float, default=0.1, help= "learning rate for actor")
-#     # parser.add_argument("--action_std_decay_freq", type=int, default=int(2.5e5), help= "learning rate for actor")
-#     # #Logging and Reporing
-#     # parser.add_argument("--print_freq", type=int, default=500, help= "printing frequency")
-#     # parser.add_argument("--log_freq", type=int, default=500, help= "logging frequency")
-#     # parser.add_argument("--save_model_freq", type=int, default=int(1e5), help= "frequency for saving model")
-#     return parser.parse_args()
 
-# def set_rewards()
-
-def main(lvl, exp, steps, log_dir):
+def main(lvl, config, steps, log_dir):
 # def main(lvl,, log_dir):
 
+    
+    #create paths
+    best_model_path = os.path.join(log_dir, 'best_model')
+
     env = gym.make(f"md-{lvl}-v0")       
-    # env = Monitor(env, log_dir)                                                    
+    # env = Monitor(env)  
+    # env = DummyVecEnv(env)  
+
+    #change reward if not orginal
+    if config['play_style'] != 'optimal':
+        rewards = get_reward_scheme(config['play_style'])   
+        env.change_reward_values(rewards)
+        print(env.setting.REWARDS)   
+
+    print("---------------------------------------------------------------------------------")
+    print(f"Experiment : {config['exp_type']} \nLevel : {config['lvl']} \nPlay_style : {config['reward_scheme']} \nTrainging_Method : PPO \nTraing_Steps : 1e6 \nCallback : EvalCallback" )
+    print("---------------------------------------------------------------------------------")
                                                                                             
-    model = PPO(policy = "MlpPolicy",env =  env, verbose=1, device="cuda", tensorboard_log=log_dir)   
-    callback = SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir=log_dir)                        
-    model.learn(total_timesteps=steps,callback=callback)                                                      
+    model = PPO(policy = "MlpPolicy",env =  env, batch_size=2048,verbose=1, device="cuda", tensorboard_log=log_dir)   
+    # callback = SaveOnBestTrainingRewardCallback(check_freq=10, log_dir=log_dir)    
+    eval_callback = EvalCallback(env, best_model_save_path=best_model_path, log_path=log_dir, eval_freq=5000,deterministic=False,verbose=0,render=False) 
+    wandb_callback = WandbCallback(verbose=1, model_save_path=log_dir, model_save_freq=5000)                   
+    model.learn(total_timesteps=steps,callback=eval_callback)                                                      
                                                                                             
     # model.save("ppo_cartpole")  # saving the model to ppo_cartpole.zip                      
     # model = PPO.load("ppo_cartpole")  # loading the model from ppo_cartpole.zip             
@@ -143,39 +213,23 @@ def main(lvl, exp, steps, log_dir):
 
 if __name__ == '__main__':
     args = parse_args()
-    # config = {
-    #     "env": args.env,
-    #     "play_style": args.play_style,
-    #     "reward_sheme": args.reward_scheme,
-    #     "experiment": "test",
-    #     # "seed":args.seed,
-    #     # "max_ep_len": args.max_ep_len,
-    #     # "max_training_timesteps":args.max_training_timesteps,
-    #     # "k_epochs":args.k_epochs,
-    #     # "eps_clip":args.eps_clip,
-    #     # "gamma": args.gamma,
-    #     # "lr_actor":args.lr_actor,
-    #     # "lr_critic": args.lr_critic,
-    #     # "action_std":args.action_std,
-    #     # "action_std_decay_rate":args.action_std_decay_rate,
-    #     # "min_action_std":args.min_action_std,
-    #     # "action_std_decay_freq":args.action_std_decay_freq,
-    #     # "print_freq":args.print_freq,
-    #     # "log_freq": args.log_freq,
-    #     # "save_model_freq": args.save_model_freq
-    # }
-    print(args)
 
     config ={
         "lvl": args.env,
         "play_style": args.play_style,
-        "reward_sheme": "original",
-        "experiment": "test",
+        "reward_scheme": args.reward_scheme,
+        "exp_type": args.exp_type,
     }
+    # print(config)
     # return
-    log_dir = "TESTING_DUMP/"
+    log_dir = f"./logs/Baseline"
+    exp = f"{config['lvl']}_{config['reward_scheme']}_{config['play_style']}_{config['exp_type']}"
+    log_dir = os.path.join(log_dir,exp)
+    log_dir = uniquify(log_dir)
     os.makedirs(log_dir, exist_ok=True)
-    wandb.init(project="gym-md_SB3_test", sync_tensorboard=True)
-    main(lvl= "simple_0", log_dir=log_dir)
+
+    wandb.init(project="gym-md_baselines", sync_tensorboard=True, config=config, name=exp)
+    main(lvl= args.env, config =config,steps=int(5e5),log_dir=log_dir)
+    wandb.finish()
     
 

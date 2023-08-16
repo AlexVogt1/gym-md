@@ -256,6 +256,10 @@ wandb/
 data/
 dump/
 TEMP/
+test_logs/
+TESTING_DUMP/
+heatmaps/
+logs/
 
 # exclude zip files
 *.zip
