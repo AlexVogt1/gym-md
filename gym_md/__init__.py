@@ -16,6 +16,10 @@ register(
     entry_point="gym_md.envs:Policy0MdEnv",
 )
 register(
+    id="md-policy_1-v0",
+    entry_point="gym_md.envs:Policy1MdEnv",
+)
+register(
     id="md-base-v0",
     entry_point="gym_md.envs:MdEnvBase",
 )

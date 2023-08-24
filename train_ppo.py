@@ -16,6 +16,8 @@ from wandb.integration.sb3 import WandbCallback
 import warnings
 warnings.filterwarnings("ignore")
 #TODO add resume training from last best model functionality
+#TODO increase batch_size
+#fix naming scheme
 
 def get_reward_scheme(type):
     rewards  ={}
@@ -39,6 +41,16 @@ def get_reward_scheme(type):
             "DEAD": -10
         }
         return rewards
+    elif type == "treasure":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 15,
+            "KILL": 0,
+            "TREASURE":50,
+            "POTION": 0,
+            "DEAD": -250
+        }
+        return rewards
     elif type == "killer_safe":
         rewards = {
             "TURN": 1,
@@ -57,6 +69,16 @@ def get_reward_scheme(type):
             "TREASURE":1,
             "POTION": 2,
             "DEAD": -10
+        }
+        return rewards
+    elif type == "killer":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 15,
+            "KILL": 50,
+            "TREASURE":0,
+            "POTION": 0,
+            "DEAD": -250
         }
         return rewards
     elif type == "runner_safe":
@@ -79,6 +101,16 @@ def get_reward_scheme(type):
             "DEAD": -5
         }
         return rewards
+    elif type == "runner":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 50,
+            "KILL": 0,
+            "TREASURE":0,
+            "POTION": 0,
+            "DEAD": -250
+        }
+        return rewards
     elif type == "clearer_safe":
         rewards = {
             "TURN": 1,
@@ -97,6 +129,16 @@ def get_reward_scheme(type):
             "TREASURE":20,
             "POTION": 20,
             "DEAD": -5
+        }
+        return rewards
+    elif type == "potion":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 10,
+            "KILL": 0,
+            "TREASURE":0,
+            "POTION": 50,
+            "DEAD": -250
         }
         return rewards
     else :
@@ -121,7 +163,8 @@ def uniquify(path, x=0):
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
             print(dir_name)
-            return dir_name
+            exp_name= dir_name.split('/')
+            return dir_name, exp_name[-1]
         else:
             x = x + 1
 
@@ -186,13 +229,29 @@ def main(lvl, config, steps, log_dir):
     if config['play_style'] != 'optimal':
         rewards = get_reward_scheme(config['play_style'])   
         env.change_reward_values(rewards)
+        print(config['play_style'])
+        print(env.setting.REWARDS) 
+    else:
+        print(config['play_style'])
         print(env.setting.REWARDS)   
+    
+    #chaning HP
+    # env.change_player_hp(10000)
+    if config['play_style'] == 'killer':
+        env.setting.PLAYER_MAX_HP = 10000
 
     print("---------------------------------------------------------------------------------")
-    print(f"Experiment : {config['exp_type']} \nLevel : {config['lvl']} \nPlay_style : {config['reward_scheme']} \nTrainging_Method : PPO \nTraing_Steps : 1e6 \nCallback : EvalCallback" )
+    print(f"Experiment : {config['exp_type']} \nLevel : {config['lvl']} \nPlay_style : {config['play_style']} \nTrainging_Method : PPO \nTraing_Steps : 1e6 \nCallback : EvalCallback" )
+    print(config['play_style'])
+    print(env.setting.REWARDS) 
+    print(env.setting.PLAYER_MAX_HP)
     print("---------------------------------------------------------------------------------")
+
+    # update config
+    # wandb.config['player_max_hp'] = env.setting.PLAYER_MAX_HP
+    wandb.config.update({'player_max_hp': env.setting.PLAYER_MAX_HP}, allow_val_change=True)
                                                                                             
-    model = PPO(policy = "MlpPolicy",env =  env, batch_size=2048,verbose=1, device="cuda", tensorboard_log=log_dir)   
+    model = PPO(policy = "MlpPolicy",env =  env, batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir)   
     # callback = SaveOnBestTrainingRewardCallback(check_freq=10, log_dir=log_dir)    
     eval_callback = EvalCallback(env, best_model_save_path=best_model_path, log_path=log_dir, eval_freq=5000,deterministic=False,verbose=0,render=False) 
     wandb_callback = WandbCallback(verbose=1, model_save_path=log_dir, model_save_freq=5000)                   
@@ -213,22 +272,25 @@ def main(lvl, config, steps, log_dir):
 
 if __name__ == '__main__':
     args = parse_args()
-
+    # get reward scheme to log in config
+    rewards = get_reward_scheme(args.play_style)
     config ={
         "lvl": args.env,
         "play_style": args.play_style,
         "reward_scheme": args.reward_scheme,
+        "rewards": rewards,
+        "player_max_hp": 0,
         "exp_type": args.exp_type,
     }
     # print(config)
     # return
-    log_dir = f"./logs/Baseline"
-    exp = f"{config['lvl']}_{config['reward_scheme']}_{config['play_style']}_{config['exp_type']}"
+    log_dir = f"./logs/reward_shaping"
+    exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}"
     log_dir = os.path.join(log_dir,exp)
-    log_dir = uniquify(log_dir)
+    log_dir, name= uniquify(log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    wandb.init(project="gym-md_baselines", sync_tensorboard=True, config=config, name=exp)
+    wandb.init(project="gym-md_reward_shaping", sync_tensorboard=True, config=config, name=name)
     main(lvl= args.env, config =config,steps=int(5e5),log_dir=log_dir)
     wandb.finish()
     

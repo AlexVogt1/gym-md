@@ -260,8 +260,10 @@ test_logs/
 TESTING_DUMP/
 heatmaps/
 logs/
+gifs/
 
 # exclude zip files
 *.zip
 *.csv
 *.pth
+*.gif

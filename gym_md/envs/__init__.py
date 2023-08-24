@@ -53,5 +53,6 @@ from gym_md.envs.md_env_list import (
     ConstantHolmgardLarge9MdEnv,
     ConstantHolmgardLarge10MdEnv,
     Policy0MdEnv,
+    Policy1MdEnv,
     Simple0MdEnv,
 )
