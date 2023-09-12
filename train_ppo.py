@@ -15,8 +15,10 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 import warnings
 warnings.filterwarnings("ignore")
-#TODO add resume training from last best model functionality
+#TODO add resume training from last best model functionality and restart
+#TODO find A way to save config into json
 #TODO increase batch_size
+#TODO improve model naming (make names unique and informative so can just drag and drop into model folder)
 #fix naming scheme
 
 def get_reward_scheme(type):
@@ -43,8 +45,8 @@ def get_reward_scheme(type):
         return rewards
     elif type == "treasure":
         rewards = {
-            "TURN": 1,
-            "EXIT": 15,
+            "TURN": 2,
+            "EXIT": 10,
             "KILL": 0,
             "TREASURE":50,
             "POTION": 0,
@@ -73,8 +75,8 @@ def get_reward_scheme(type):
         return rewards
     elif type == "killer":
         rewards = {
-            "TURN": 1,
-            "EXIT": 15,
+            "TURN": 2,
+            "EXIT": 10,
             "KILL": 50,
             "TREASURE":0,
             "POTION": 0,
@@ -133,7 +135,7 @@ def get_reward_scheme(type):
         return rewards
     elif type == "potion":
         rewards = {
-            "TURN": 1,
+            "TURN": 2,
             "EXIT": 10,
             "KILL": 0,
             "TREASURE":0,
@@ -237,6 +239,7 @@ def main(lvl, config, steps, log_dir):
     
     #chaning HP
     # env.change_player_hp(10000)
+    env.setting.IS_ENEMY_POWER_RANDOM
     if config['play_style'] == 'killer':
         env.setting.PLAYER_MAX_HP = 10000
 
@@ -284,7 +287,7 @@ if __name__ == '__main__':
     }
     # print(config)
     # return
-    log_dir = f"./logs/reward_shaping"
+    log_dir = f"./logs/reward_shaping_part2"
     exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}"
     log_dir = os.path.join(log_dir,exp)
     log_dir, name= uniquify(log_dir)

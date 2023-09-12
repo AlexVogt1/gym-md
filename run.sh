@@ -4,16 +4,24 @@ echo "------------------------------------------------------------------------"
 echo Running on $HOSTNAME...
 echo Running on $HOSTNAME... >&2
 # levels=("holmgard_9" "policy_0")
-reward_test_levels=("check_1" "holmgard_9" "hard")
+reward_test_levels=("policy_1" "check_1" "holmgard_9" "hard")
 basic_play_styles=("treasure" "killer" "runner" "potion")
 play_styles=("runner_safe" "runner_risky" "killer_safe" "killer_risky" "treasure_safe" "treasure_risky" "clearer_safe" "clearer_risky")
 # source ~/.bashrc
 # cd ~/src/EDPCGARL/gym-pcgrl
+python train_ppo.py --env=policy_1 --play_style=killer --reward_scheme=fiftytwoFiftytwo --exp_type=StepRewardShaping
+
 for i in "${reward_test_levels[@]}"; do   # The quotes are necessary here
     for j in "${basic_play_styles[@]}"; do   # The quotes are necessary here
-        python train_ppo.py --env="$i" --play_style="$j" --reward_scheme=fifty_twoFifty --exp_type=rewardShaping
+        python train_ppo.py --env="$i" --play_style="$j" --reward_scheme=fifty_twoFiftytwo --exp_type=SteprewardShaping
 done
 done
+
+
+#train killer
+# for i in "${reward_test_levels[@]}"; do   # The quotes are necessary here
+#     python train_ppo.py --env="$i" --play_style=killer --reward_scheme=fiftytwoFifty --exp_type=rewardShapingKillerLonger
+# done
 
 #finish hard exp
 # fin_hard=("treasure_risky" "clearer_safe" "clearer_risky")
