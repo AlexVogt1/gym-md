@@ -10,20 +10,23 @@ from gym_md.envs.setting import Setting
 from gym_md.helper.util import list_files
 
 # class ppoWrapper:
+#TODO create dictionary for PolicyName-model pairs
 
+# wrapper class 
+    # - wraps all the models 
 
 class PolicyWapper:
-    def __init__(self, setting: Setting,path = '../play_style_models/base/'):
+    def __init__(self, path = '../play_style_models/base/'):
         self.path: Final[str]= path
-        self.setting= Setting
         self.path_list: Final[List[str]] = list_files(path)
         self.play_style_list: Final[List[str]]= [os.path.splitext(x)[0] for x in self.path_list]
         self.model_paths: Final[List[str]] = [F"{self.path}/{s}"for s in self.play_style_list]
-        self.model_objects =[]
         if torch.cuda.is_available:
             self.device = 'cuda'
         else:
             self.device = 'cpu'
+        self.policy_names = self.gen_policy_names()
+        self.wrapped_models = self.build_all_models(path)
 
 
     def get_model_paths(self):
@@ -39,7 +42,7 @@ class PolicyWapper:
     def build_model(self, model_path):
         return PPO.load(model_path,device=self.device)
 
-    def build_all_models(self):
+    def build_all_models(self, path):
         models = []
         for model in self.model_paths:
             models.append(self.build_model(model))

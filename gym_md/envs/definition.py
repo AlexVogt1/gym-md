@@ -30,10 +30,10 @@ ACTIONS: Final[List[str]] = [
     "EXIT",
     "EXIT_SAFELY",
 ]
-POLICY_ACTIONS: Final[List[str]]=[
+POLICY_ACTIONS: Final[List[str]]= [
     "TREASURE",
     "KILLER",
-    "RUNNER"
+    "RUNNER",
     "POTION",
 ]
 CUSTOM_PROPS: Final[List[str]] = [

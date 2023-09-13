@@ -13,40 +13,51 @@ from gym_md.envs.grid import Grid
 from gym_md.envs.point import Point
 from gym_md.envs.setting import Setting
 from gym_md.envs.agent.agent import Agent
+from gym_md.helper.policy_wrapper import PolicyWapper
 
 
 class PolicyAgent(Agent):
     """Agent class.
 
     エージェントクラス．
+    The policy agent loads the policies and gets wrapped,
+    chooses the policy and performs the action of the chosen policy
+
+    - function to choose policy
+    - function to perform forward pass of policies
     Pather, Actionerを持つ．
     """
 
-    def __init__(self, grid: Grid, setting: Setting, random: Random, action_type: str):
+    # polices need to be the list generatied from the wrapper
+
+    def __init__(self, grid: Grid, setting: Setting, random: Random, action_type: str, path:str):
         super().__init__(grid, setting, random)
         self.action_type = action_type
+        self.model_path = path
+        self.play_styles: PolicyWapper = PolicyWapper(path)
+        self.actions: Final[List[str]] = self.play_styles.policy_names
 
-    # def reset(self) -> None:
-    #     """エージェントの初期化をする.
-    #     Reset/Initialize the agent
 
-    #     Notes
-    #     -----
-    #     リセット形式にしている．
-    #     これは，一回一回Agentインスタンスを作ると，rendererなどの参照とずれてしまうため
-    #     - in reset format
-    #     - This is because if you create an Agent instance once, it will be misaligned with references such as renderer
 
-    #     """
-    #     self.hp = self.setting.PLAYER_MAX_HP
-    #     init_pos: Final[Point] = self._init_player_pos()
-    #     self.y: int = init_pos[0]
-    #     self.x: int = init_pos[1]
+    def reset(self) -> None:
+        """エージェントの初期化をする.
+        Reset/Initialize the agent
+
+        Notes
+        -----
+        リセット形式にしている．
+        これは，一回一回Agentインスタンスを作ると，rendererなどの参照とずれてしまうため
+        - in reset format
+        - This is because if you create an Agent instance once, it will be misaligned with references such as renderer
+
+        """
+        self.hp = self.setting.PLAYER_MAX_HP
+        init_pos: Final[Point] = self._init_player_pos()
+        self.y: int = init_pos[0]
+        self.x: int = init_pos[1]
+
+
     def get_policy_action(self, policy: str) -> str:
-        # take policy find path for policy
-        path = ""
-        # load policy
-        # predict
 
         return 'action'
 
