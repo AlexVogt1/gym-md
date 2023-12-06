@@ -1,3 +1,4 @@
+from ast import Tuple
 from logging import config
 import os
 import numpy as np                                                   
@@ -5,13 +6,15 @@ import gym
 from sympy import true   
 import gym_md 
 import argparse
-from stable_baselines3 import PPO  
+from stable_baselines3 import PPO, DQN
 from stable_baselines3.common import results_plotter
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.results_plotter import load_results, ts2xy, plot_results
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 import wandb
+from pprint import pprint
+from util import debug_env
 from wandb.integration.sb3 import WandbCallback
 import warnings
 warnings.filterwarnings("ignore")
@@ -45,12 +48,12 @@ def get_reward_scheme(type):
         return rewards
     elif type == "treasure":
         rewards = {
-            "TURN": 2,
-            "EXIT": 10,
-            "KILL": 0,
-            "TREASURE":50,
-            "POTION": 0,
-            "DEAD": -250
+            "TURN": 2,  #0.2, #2
+            "EXIT": 10, #-1, #-10
+            "KILL": 0, #-1.5, # -25
+            "TREASURE":50, #2.5, # 50
+            "POTION": 0, #-1.5, # -25
+            "DEAD": -250, #-10 # 250
         }
         return rewards
     elif type == "killer_safe":
@@ -75,12 +78,12 @@ def get_reward_scheme(type):
         return rewards
     elif type == "killer":
         rewards = {
-            "TURN": 2,
-            "EXIT": 10,
-            "KILL": 50,
-            "TREASURE":0,
-            "POTION": 0,
-            "DEAD": -250
+            "TURN": 2, #0.2,
+            "EXIT": 10, # -1,
+            "KILL": 50, #2.5,
+            "TREASURE": 0, #-1.5,
+            "POTION": 0, #-1.5,
+            "DEAD": -250 #-10
         }
         return rewards
     elif type == "runner_safe":
@@ -105,12 +108,12 @@ def get_reward_scheme(type):
         return rewards
     elif type == "runner":
         rewards = {
-            "TURN": 1,
-            "EXIT": 50,
-            "KILL": 0,
-            "TREASURE":0,
-            "POTION": 0,
-            "DEAD": -250
+            "TURN": 2, #0.2,
+            "EXIT": 50, #2.5,
+            "KILL": 0, #-1.5,
+            "TREASURE": 0, #-1.5,
+            "POTION": 0, # -1.5,
+            "DEAD": -250, #-10
         }
         return rewards
     elif type == "clearer_safe":
@@ -135,12 +138,32 @@ def get_reward_scheme(type):
         return rewards
     elif type == "potion":
         rewards = {
-            "TURN": 2,
-            "EXIT": 10,
-            "KILL": 0,
-            "TREASURE":0,
-            "POTION": 50,
-            "DEAD": -250
+            "TURN": 2, #0.2,
+            "EXIT": 10, #-1,
+            "KILL": 0, #-1.5,
+            "TREASURE": 0, #-1.5,
+            "POTION": 50, #2.5,
+            "DEAD": -250, #-10
+        }
+        return rewards
+    elif type == "switch":
+        rewards = {
+            "TURN": 1,
+            "EXIT": 5,
+            "KILL": 10,
+            "TREASURE":10,
+            "POTION": 10,
+            "DEAD": -25
+        }
+        return rewards
+    elif type == "hard":
+        rewards= {
+            "TURN": 1,
+            "EXIT": 20,
+            "KILL": 4,
+            "TREASURE": 3,
+            "POTION": 1,
+            "DEAD": -20
         }
         return rewards
     else :
@@ -155,6 +178,13 @@ def parse_args():
     parser.add_argument("--play_style", type=str, default="optimal", help= "what type of player are you wanting to train")
     parser.add_argument("--reward_scheme", type=str, default="original", help= "what reward scheme are you using for training")
     parser.add_argument("--exp_type", type=str, default="test", help= "what type of experiment are you running")
+    parser.add_argument("--action_type", type=str, default="path", help= "what type action space")
+    parser.add_argument("--action_space_type", type=str, default="discrete", help= "what type action space")
+    parser.add_argument("--obs_type", type=str, default="distance", help= "what type obs space (grid ir disances)")
+    parser.add_argument("--base_path", type=str, default="./play_style_models/grid_base_12x12/", help= "path direct for the base play-style policies")
+    parser.add_argument("--algo", type=str, default="PPO", help= "what algo are you using to learn")
+
+
     # parser.add_argument("--resume", type=str, default=, help= "what type of experiment are you running")
 
     return parser.parse_args()
@@ -221,9 +251,11 @@ def main(lvl, config, steps, log_dir):
 
     
     #create paths
-    best_model_path = os.path.join(log_dir, 'best_model')
-
-    env = gym.make(f"md-{lvl}-v0")       
+    best_model_path = os.path.join(log_dir, config['play_style'])
+    if config['action_type'] == 'policy':
+        env = gym.make(f"md-{lvl}-v0",config = config)       
+    else:
+        env = gym.make(f"md-{lvl}-v0",config =config)       
     # env = Monitor(env)  
     # env = DummyVecEnv(env)  
 
@@ -249,14 +281,25 @@ def main(lvl, config, steps, log_dir):
     print(env.setting.REWARDS) 
     print(env.setting.PLAYER_MAX_HP)
     print("---------------------------------------------------------------------------------")
+    debug_env(env)
+    print("---------------------------------------------------------------------------------")
+    print("---------------------------------------------------------------------------------")
+    print(config)
+    print("---------------------------------------------------------------------------------")
+    
 
     # update config
     # wandb.config['player_max_hp'] = env.setting.PLAYER_MAX_HP
     wandb.config.update({'player_max_hp': env.setting.PLAYER_MAX_HP}, allow_val_change=True)
-                                                                                            
-    model = PPO(policy = "MlpPolicy",env =  env, batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir)   
+
+    if config['algorithm'] == 'DQN':
+        model = DQN(policy='MlpPolicy',env= env, batch_size=2560,learning_starts= 5000,target_update_interval=1000,verbose=1, device='cuda',tensorboard_log=log_dir,)             
+    else:                                                              
+        model = PPO(policy = "MlpPolicy",env =  env,batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir)   
+        # model = PPO(policy = "MlpPolicy",env =  env, batch_size=32,verbose=1, device="cuda", tensorboard_log=log_dir, use_sde=True)   
+
     # callback = SaveOnBestTrainingRewardCallback(check_freq=10, log_dir=log_dir)    
-    eval_callback = EvalCallback(env, best_model_save_path=best_model_path, log_path=log_dir, eval_freq=5000,deterministic=False,verbose=0,render=False) 
+    eval_callback = EvalCallback(env, best_model_save_path=best_model_path, log_path=log_dir, eval_freq=1000,deterministic=False,verbose=1,render=False) 
     wandb_callback = WandbCallback(verbose=1, model_save_path=log_dir, model_save_freq=5000)                   
     model.learn(total_timesteps=steps,callback=eval_callback)                                                      
                                                                                             
@@ -284,16 +327,21 @@ if __name__ == '__main__':
         "rewards": rewards,
         "player_max_hp": 0,
         "exp_type": args.exp_type,
+        "action_type": args.action_type,
+        "action_space_type": args.action_space_type,
+        "obs_type": args.obs_type,
+        "base_path": args.base_path,
+        "algorithm": args.algo,
     }
-    # print(config)
+    print(config)
     # return
-    log_dir = f"./logs/reward_shaping_part2"
-    exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}"
+    log_dir = f"./logs/switching_analysis"
+    exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}_{config['algorithm']}"
     log_dir = os.path.join(log_dir,exp)
     log_dir, name= uniquify(log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    wandb.init(project="gym-md_reward_shaping", sync_tensorboard=True, config=config, name=name)
+    wandb.init(project="gym-md_analysis", sync_tensorboard=True, config=config, name=name)
     main(lvl= args.env, config =config,steps=int(5e5),log_dir=log_dir)
     wandb.finish()
     

@@ -261,6 +261,7 @@ TESTING_DUMP/
 heatmaps/
 logs/
 gifs/
+test_analysis/
 
 # exclude zip files
 *.zip

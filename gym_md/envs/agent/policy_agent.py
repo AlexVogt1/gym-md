@@ -15,6 +15,7 @@ from gym_md.envs.setting import Setting
 from gym_md.envs.agent.agent import Agent
 from gym_md.helper.policy_wrapper import PolicyWapper
 
+#TODO think about do we want the policy parameter to be string and then get the model based on that or what?
 
 class PolicyAgent(Agent):
     """Agent class.
@@ -30,14 +31,14 @@ class PolicyAgent(Agent):
 
     # polices need to be the list generatied from the wrapper
 
-    def __init__(self, grid: Grid, setting: Setting, random: Random, action_type: str, path:str):
+    def __init__(self, grid: Grid, setting: Setting, random: Random, action_type: str, path:str, debug = False):
         super().__init__(grid, setting, random)
         self.action_type = action_type
         self.model_path = path
+        self.debug = debug
         self.play_styles: PolicyWapper = PolicyWapper(path)
         self.actions: Final[List[str]] = self.play_styles.policy_names
-
-
+        self.obs =[]
 
     def reset(self) -> None:
         """エージェントの初期化をする.
@@ -57,15 +58,22 @@ class PolicyAgent(Agent):
         self.x: int = init_pos[1]
 
 
-    def get_policy_action(self, policy: str) -> str:
-
-        return 'action'
+    def get_policy_action(self, policy:str):
+        # takes in the chosen policy and performs a predict
+        policy_actions, _ = self.play_styles.wrapped_models[policy].predict(self.obs,deterministic=True)
+        if self.debug:
+            print("getting policy action")
+            print(f"Policy: {policy}\nObsevation: {self.obs}")
+            print(f"Policy actions given obs: {policy_actions}")
+        # them peroform the normal select action
+        return policy_actions
+        
 
     def select_action(self, actions: Actions) -> str:
         if self.action_type == 'policy':
             return self.select_policy_action(actions)
         else:
-            return super().take_action(actions)
+            return super().select_action(actions)
 
     def select_policy_action(self, actions: Actions) -> str:
         # takes in a list of real values the size of the number of polices
@@ -78,30 +86,44 @@ class PolicyAgent(Agent):
 
         # NUM_TO_POLICY_ACTION =  {0: 'TREASURE', 1: 'KILLER', 2: 'RUNNER', 3: 'POTION'}
         action_out = self.setting.NUM_TO_POLICY_ACTION[max_actions[0]]
+        if self.debug ==True:
+            print("Selecting Policy")
+            print(f"Chosen polcy:{action_out}")
         return action_out
 
-        return
+
     def take_action(self, action: str) -> None:
-        if self.action_type == 'policy':
+        if self.action_type == 'policy' or self.action_type == "switch":
             return self.take_policy_action(action)
         else:
             return super().take_action(action)
         
     def take_policy_action(self, policy:str):
-        if policy == 'TREASURE':
-            action = get_policy_action(policy)
-            super().take_action(action)
-        elif policy == 'KILLER':
-            action = get_policy_action(policy)
-            super().take_action(action)
-        elif policy == 'RUNNER':
-            action = get_policy_action(policy)
-            super().take_action(action)
-        elif policy == 'POTION':
-            action = get_policy_action(policy)
-            super().take_action(action)
-        else:
-            print("ERROR: POLICY DOES NOT EXIST -> policy_agent -> take_policy_action")
+        policy_actions = self.get_policy_action(policy)
+        action = super().select_action(policy_actions)
+        if self.debug:
+            print("taking policy action")
+            print(f"actions of chosen policy:\n{policy_actions}")
+            print(f"final chosen action:\n {action}")
+        super().take_action(action)
+
+
+        
+        
+        # if policy == 'TREASURE':
+        #     action = self.get_policy_action(policy)
+        #     super().take_action(action)
+        # elif policy == 'KILLER':
+        #     action = self.get_policy_action(policy)
+        #     super().take_action(action)
+        # elif policy == 'RUNNER':
+        #     action = self.get_policy_action(policy)
+        #     super().take_action(action)
+        # elif policy == 'POTION':
+        #     action = self.get_policy_action(policy)
+        #     super().take_action(action)
+        # else:
+        #     print("ERROR: POLICY DOES NOT EXIST -> policy_agent -> take_policy_action")
             
 
 

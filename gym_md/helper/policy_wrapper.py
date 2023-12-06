@@ -1,4 +1,6 @@
+from email import policy
 import os
+from pyexpat import model
 from typing import Final, List
 import torch
 import numpy as np
@@ -16,11 +18,12 @@ from gym_md.helper.util import list_files
     # - wraps all the models 
 
 class PolicyWapper:
-    def __init__(self, path = '../play_style_models/base/'):
+    def __init__(self, path = '../play_style_models/grid_base_12x12/'):
         self.path: Final[str]= path
         self.path_list: Final[List[str]] = list_files(path)
         self.play_style_list: Final[List[str]]= [os.path.splitext(x)[0] for x in self.path_list]
         self.model_paths: Final[List[str]] = [F"{self.path}/{s}"for s in self.play_style_list]
+        self.n_models: Final[int] = len(self.model_paths)
         if torch.cuda.is_available:
             self.device = 'cuda'
         else:
@@ -43,8 +46,10 @@ class PolicyWapper:
         return PPO.load(model_path,device=self.device)
 
     def build_all_models(self, path):
-        models = []
+        #TODO change to dict
+        models_list = []
         for model in self.model_paths:
-            models.append(self.build_model(model))
+            models_list.append(self.build_model(model))
+        models = dict(zip(self.policy_names, models_list))
         return models
     

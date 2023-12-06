@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from PIL import Image
 
-env = gym.make('md-policy_1-v0')
+env = gym.make('md-policy_3-v0')
 
 obs = env.reset()
 img =env.render(mode='human')
@@ -16,4 +16,4 @@ actions = [random.random() for _ in range(7)]
 img=env.generate()
 print(img)
 # plt.show(block=True)
-img.save('./README/resources/md_stages_screenshots/md-policy_1-v0_step0.png')
+img.save('./README/resources/md_stages_screenshots/md-policy_3-v0_step0.png')

@@ -3,19 +3,41 @@ echo "Job started on" `date`
 echo "------------------------------------------------------------------------"
 echo Running on $HOSTNAME...
 echo Running on $HOSTNAME... >&2
-# levels=("holmgard_9" "policy_0")
+
 reward_test_levels=("policy_1" "check_1" "holmgard_9" "hard")
+levels=("holmgard_9" "check_1" "strand_2" "check_2" "check_3" "strand_1")
+# levels=("holmgard_2" "holmgard_3" "holmgard_4" "holmgard_5" "holmgard_6" "holmgard_7" "holmgard_8" "holmgard_9" "check_1" "strand_2" "check_2" "check_3" "strand_1")
+# levels=("hard" "holmgard_0" "holmgard_1" "holmgard_2" "holmgard_3" "check_1" "strand_2" "check_2" "check_3" "strand_1")
+# levels=("check_1" "strand_2" "check_2" "check_3" "strand_1")
 basic_play_styles=("treasure" "killer" "runner" "potion")
+analysis_play_styles=("switch" "hard" "treasure" "killer" "runner" "potion")
 play_styles=("runner_safe" "runner_risky" "killer_safe" "killer_risky" "treasure_safe" "treasure_risky" "clearer_safe" "clearer_risky")
+
 # source ~/.bashrc
 # cd ~/src/EDPCGARL/gym-pcgrl
-python train_ppo.py --env=policy_1 --play_style=killer --reward_scheme=fiftytwoFiftytwo --exp_type=StepRewardShaping
 
-for i in "${reward_test_levels[@]}"; do   # The quotes are necessary here
-    for j in "${basic_play_styles[@]}"; do   # The quotes are necessary here
-        python train_ppo.py --env="$i" --play_style="$j" --reward_scheme=fifty_twoFiftytwo --exp_type=SteprewardShaping
-done
-done
+# python train_ppo.py --env=switch-policy_4 --play_style=runner --reward_scheme=runner --exp_type=grid_base_12x12 --action_type=path --action_space_type=box --obs_type=grid --algo=PPO
+
+# # python train_ppo.py --env=switch-holmgard_9 --play_style=hard --reward_scheme=exitLessBetter4 --exp_type=switch --action_type=policy --algo=DQN
+
+# # python train_ppo.py --env=switch-policy_2 --play_style=switch --reward_scheme=switch --exp_type=config_test --action_type=path --action_space_type=box --obs_type=grid --algo=PPO
+
+# # grid base policies
+# # for i in "${basic_play_styles}"; do
+# #     python train_ppo.py --env=switch-policy_4 --play_style="$i" --reward_scheme="$i" --exp_type=grid_base_12x12 --action_type=path --action_space_type=box --obs_type=grid --algo=PPO
+# # done
+python train_ppo.py --env=switch-holmgard_6 --play_style=switch --reward_scheme=switch --exp_type=switch_analysis --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
+# python train_ppo.py --env=switch-check_1 --play_style=potion --reward_scheme=potion --exp_type=switch_analysis --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
+# for i in "${levels[@]}"; do
+#     for j in "${analysis_play_styles[@]}"; do   # The quotes are necessary here
+#         python train_ppo.py --env=switch-"$i" --play_style="$j" --reward_scheme="$j" --exp_type=switch_analysis --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
+# done
+# done
+# for i in "${reward_test_levels[@]}"; do   # The quotes are necessary here
+#     for j in "${basic_play_styles[@]}"; do   # The quotes are necessary here
+#         python train_ppo.py --env="$i" --play_style="$j" --reward_scheme=fifty_twoFiftytwo --exp_type=SteprewardShaping
+# done
+# done
 
 
 #train killer

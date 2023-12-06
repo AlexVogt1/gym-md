@@ -1,5 +1,9 @@
 import os
 from typing import List
+from pprint import pprint
+
+def object_debug(object):
+    pprint(vars(object))
 
 def list_files(dir_path) -> List[str]:
     # list to store files

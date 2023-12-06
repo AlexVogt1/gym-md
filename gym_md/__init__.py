@@ -20,6 +20,30 @@ register(
     entry_point="gym_md.envs:Policy1MdEnv",
 )
 register(
+    id="md-switch-policy_1-v0",
+    entry_point="gym_md.envs:PolicySwitch1MdEnv",
+)
+register(
+    id="md-switch-policy_2-v0",
+    entry_point="gym_md.envs:PolicySwitch2MdEnv",
+)
+register(
+    id="md-switch-policy_3-v0",
+    entry_point="gym_md.envs:PolicySwitch3MdEnv",
+)
+register(
+    id="md-switch-policy_4-v0",
+    entry_point="gym_md.envs:PolicySwitch4MdEnv",
+)
+register(
+    id="md-policy_2-v0",
+    entry_point="gym_md.envs:Policy2MdEnv",
+)
+register(
+    id="md-policy_3-v0",
+    entry_point="gym_md.envs:Policy3MdEnv",
+)
+register(
     id="md-base-v0",
     entry_point="gym_md.envs:MdEnvBase",
 )
@@ -73,3 +97,25 @@ for i in range(11):
         id=f"md-constant-holmgard-large_{i}-v0",
         entry_point=f"gym_md.envs:ConstantHolmgardLarge{i}MdEnv",
     )
+for i in range(11):
+    register(
+        id=f"md-switch-holmgard_{i}-v0",
+        entry_point=f"gym_md.envs:HolmgardSwitch{i}MdEnv",
+    )
+
+for i in range(3):
+    register(
+        id=f"md-switch-check_{i+1}-v0",
+        entry_point=f"gym_md.envs:CheckSwitch{i+1}MdEnv",
+    )
+
+for i in range(5):
+    register(
+        id=f"md-switch-strand_{i + 1}-v0",
+        entry_point=f"gym_md.envs:StrandSwitch{i + 1}MdEnv",
+    )
+
+register(
+    id="md-switch-hard-v0",
+    entry_point="gym_md.envs:HardSwitchMdEnv",
+)
