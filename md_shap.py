@@ -396,7 +396,7 @@ def gen_data(config):
     elif algo == 'DQN':
         model = DQN.load(f"logs/{path}/{exp}/{play_style}/best_model")  # loading the model from ppo_cartpole.zip 
     else:
-        model = PPO.load(f"logs/{path}/{exp}/{play_style}/best_model")  # loading the model from ppo_cartpole.zip 
+        model = PPO.load(f"logs/{path}/{exp}/{play_style}/latest_model_500000_steps.zip")  # loading the model from ppo_cartpole.zip 
                                                                                      
     curr_obs = env.reset()  
     curr_grid = np.array(env.grid.g)
@@ -532,7 +532,7 @@ def shappy(config,explainer_type ='deep'):
     
 
     if explainer_type == "kernel":
-        f = lambda x: model.forward(Variable(torch.from_numpy(x)).to(float32).cuda()).detach().cpu().numpy()
+        f = lambda x: model.forward(Variable(torch.from_numpy(x),requires_grad=False).to(float32).cuda()).detach().cpu().numpy()
         explainer = shap.KernelExplainer(f, state_log)
         shap_vals= explainer.shap_values(state_log)
     else:
@@ -878,7 +878,7 @@ def qauntitative_results(explainer, shap_vals, data, df, save_loc):
     shap_valss = []
     policy_classes = ['killer','treasure','runner','potion']
 
-    reshaped_shap_vals = np.transpose(np.array(shap_vals),(1,0,2))
+    reshaped_shap_vals = np.transpose(np.array(shap_vals),(0,2,1))
     action_shap_vals=[]
     for i, row in df.iterrows():
         action = row['action']
