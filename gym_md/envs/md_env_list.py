@@ -430,6 +430,41 @@ class Policy3MdEnv(MdEnvBase):
         stage_name: Final[str] = "policy_3"
         super(Policy3MdEnv, self).__init__(stage_name=stage_name)
 
+class Policy4MdEnv(MdEnvBase):
+    """SwitchMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_4"
+        super(Policy4MdEnv, self).__init__(stage_name=stage_name)
+
+class Policy5MdEnv(MdEnvBase):
+    """SwitchMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_5"
+        super(Policy5MdEnv, self).__init__(stage_name=stage_name)
+
+class Policy6MdEnv(MdEnvBase):
+    """SwitchMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_6"
+        super(Policy6MdEnv, self).__init__(stage_name=stage_name)
+
+class Policy7MdEnv(MdEnvBase):
+    """SwitchMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_7"
+        super(Policy7MdEnv, self).__init__(stage_name=stage_name)
+
+class Policy8MdEnv(MdEnvBase):
+    """SwitchMdEnv Class."""
+
+    def __init__(self):
+        stage_name: Final[str] = "policy_8"
+        super(Policy8MdEnv, self).__init__(stage_name=stage_name)
+
 class PolicySwitch1MdEnv(MdPolicyEnv):
     """PolicyMdEnv Class."""
 
@@ -464,6 +499,34 @@ class PolicySwitch4MdEnv(MdPolicyEnv):
     def __init__(self,config:dict= default_config):
         stage_name: Final[str] = "policy_4"
         super(PolicySwitch4MdEnv, self).__init__(stage_name=stage_name,config = config)
+
+class PolicySwitch5MdEnv(MdPolicyEnv):
+    """Switch Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "policy_5"
+        super(PolicySwitch5MdEnv, self).__init__(stage_name=stage_name,config = config)
+
+class PolicySwitch6MdEnv(MdPolicyEnv):
+    """Switch Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "policy_6"
+        super(PolicySwitch6MdEnv, self).__init__(stage_name=stage_name,config = config)
+
+class PolicySwitch7MdEnv(MdPolicyEnv):
+    """Switch Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "policy_7"
+        super(PolicySwitch7MdEnv, self).__init__(stage_name=stage_name,config = config)
+
+class PolicySwitch8MdEnv(MdPolicyEnv):
+    """Switch Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "policy_8"
+        super(PolicySwitch8MdEnv, self).__init__(stage_name=stage_name,config = config)
 
 class HolmgardSwitch0MdEnv(MdPolicyEnv):
     """Holmgard Class."""
@@ -611,3 +674,18 @@ class StrandSwitch5MdEnv(MdPolicyEnv):
     def __init__(self, config:dict= default_config):
         stage_name: Final[str] = "strand_5"
         super(StrandSwitch5MdEnv, self).__init__(stage_name=stage_name, config = config)
+
+class GeneSwitch1MdEnv(MdPolicyEnv):
+    """Random1Env Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "gene_1"
+        super(GeneSwitch1MdEnv, self).__init__(stage_name=stage_name,config=config)
+
+
+class GeneSwitch2MdEnv(MdPolicyEnv):
+    """Random1Env Class."""
+
+    def __init__(self,config:dict= default_config):
+        stage_name: Final[str] = "gene_2"
+        super(GeneSwitch2MdEnv, self).__init__(stage_name=stage_name,config=config)

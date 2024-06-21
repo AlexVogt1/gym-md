@@ -36,12 +36,48 @@ register(
     entry_point="gym_md.envs:PolicySwitch4MdEnv",
 )
 register(
+    id="md-switch-policy_5-v0",
+    entry_point="gym_md.envs:PolicySwitch5MdEnv",
+)
+register(
+    id="md-switch-policy_6-v0",
+    entry_point="gym_md.envs:PolicySwitch6MdEnv",
+)
+register(
+    id="md-switch-policy_7-v0",
+    entry_point="gym_md.envs:PolicySwitch7MdEnv",
+)
+register(
+    id="md-switch-policy_8-v0",
+    entry_point="gym_md.envs:PolicySwitch8MdEnv",
+)
+register(
     id="md-policy_2-v0",
     entry_point="gym_md.envs:Policy2MdEnv",
 )
 register(
     id="md-policy_3-v0",
     entry_point="gym_md.envs:Policy3MdEnv",
+)
+register(
+    id="md-policy_4-v0",
+    entry_point="gym_md.envs:Policy4MdEnv",
+)
+register(
+    id="md-policy_5-v0",
+    entry_point="gym_md.envs:Policy5MdEnv",
+)
+register(
+    id="md-policy_6-v0",
+    entry_point="gym_md.envs:Policy6MdEnv",
+)
+register(
+    id="md-policy_7-v0",
+    entry_point="gym_md.envs:Policy7MdEnv",
+)
+register(
+    id="md-policy_8-v0",
+    entry_point="gym_md.envs:Policy8MdEnv",
 )
 register(
     id="md-base-v0",
@@ -71,6 +107,11 @@ for i in range(2):
     register(
         id=f"md-gene_{i + 1}-v0",
         entry_point=f"gym_md.envs:Gene{i + 1}MdEnv",
+    )
+for i in range(2):
+    register(
+        id=f"md-switch-gene_{i + 1}-v0",
+        entry_point=f"gym_md.envs:GeneSwitch{i + 1}MdEnv",
     )
 for i in range(5):
     register(

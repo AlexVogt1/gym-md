@@ -150,10 +150,10 @@ def get_reward_scheme(type):
     elif type == "switch":
         rewards = {
             "TURN": 1,
-            "EXIT": 5,
-            "KILL": 10,
-            "TREASURE":10,
-            "POTION": 10,
+            "EXIT": 3,#5,
+            "KILL": 5,#5,
+            "TREASURE":5,#5,
+            "POTION": 5,#5,
             "DEAD": -25
         }
         return rewards
@@ -275,7 +275,9 @@ def main(lvl, config, steps, log_dir):
     
     #chaning HP
     # env.change_player_hp(10000)
-    env.setting.IS_ENEMY_POWER_RANDOM
+    # env.setting.DISTANCE_INF= -1
+    print(f"inf value: {env.setting.DISTANCE_INF}")
+    # env.setting.IS_ENEMY_POWER_RANDOM
     if config['play_style'] == 'killer':
         env.setting.PLAYER_MAX_HP = 100
 
@@ -299,10 +301,12 @@ def main(lvl, config, steps, log_dir):
     if config['algorithm'] == 'DQN':
         model = DQN(policy='MlpPolicy',env= env, batch_size=2560,learning_starts= 5000,target_update_interval=1000,verbose=1, device='cuda',tensorboard_log=log_dir,)             
     else: 
-        policy_kwargs = dict(activation_fn=th.nn.ReLU,net_arch=dict(pi=[32, 32], vf=[32, 32]))                                                             
-        # model = PPO(policy = "MlpPolicy",env =  env,batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir)   
-        # model = PPO(policy = "MlpPolicy",env =  env, batch_size=1024,verbose=1, device="cuda", tensorboard_log=log_dir)   
-        model = PPO(policy = "MlpPolicy",env =  env, batch_size=2048,verbose=1, device="cuda", tensorboard_log=log_dir,policy_kwargs=policy_kwargs)   
+        # policy_kwargs = dict(activation_fn=th.nn.ReLU,net_arch=dict(pi=[32, 32], vf=[32, 32]))                                                             
+        # model = PPO(policy = "MlpPolicy",env =  env,batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir) 
+        model = PPO(policy = "MlpPolicy",env =  env,batch_size=32,verbose=1, device="cuda", tensorboard_log=log_dir)     
+        # model = PPO(policy = "MlpPolicy",env =  env, batch_size=1024,verbose=1, device="cuda", tensorboard_log=log_dir) 
+        # model = PPO(policy = "MlpPolicy",env =  env, batch_size=256,verbose=1, device="cuda", tensorboard_log=log_dir) 
+        # model = PPO(policy = "MlpPolicy",env =  env, batch_size=2048,verbose=1, device="cuda", tensorboard_log=log_dir,policy_kwargs=policy_kwargs)   
 
     # callback = SaveOnBestTrainingRewardCallback(check_freq=10, log_dir=log_dir)    
     eval_callback = EvalCallback(env, best_model_save_path=best_model_path, log_path=log_dir, eval_freq=1000,deterministic=False,verbose=1,render=False) 
@@ -343,14 +347,14 @@ if __name__ == '__main__':
     }
     print(config)
     # return
-    log_dir = f"./logs/switching_analysis_killer_test"
+    log_dir = f"./logs/groupShap_32_01"
     exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}_{config['algorithm']}"
     log_dir = os.path.join(log_dir,exp)
     log_dir, name= uniquify(log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    wandb.init(project="gym-md_analysis_killer_test", sync_tensorboard=True, config=config, name=name)
-    main(lvl= args.env, config =config,steps=int(5e5),log_dir=log_dir)
+    wandb.init(project="gym-md_groupShap_32_01", sync_tensorboard=True, config=config, name=name)
+    main(lvl= args.env, config =config,steps=int(1e6),log_dir=log_dir)
     wandb.finish()
     
 
