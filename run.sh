@@ -25,7 +25,7 @@ play_styles=("runner_safe" "runner_risky" "killer_safe" "killer_risky" "treasure
 for i in "${levels[@]}" 
 do
     echo "$i"
-    python train_ppo.py --env=switch-"$i" --play_style=switch --reward_scheme=switch --exp_type=groupShap_32_01 --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
+    python train_ppo.py --env=switch-"$i" --play_style=switch --reward_scheme=switch --exp_type=groupShap_64_01 --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
 done
 # python train_ppo.py --env=switch-hard --play_style=killer --reward_scheme=killer --exp_type=switch_analysis_killer_net_bigbatch --action_type=policy --action_space_type=discrete --obs_type=distance --algo=PPO --base_path=./play_style_models/base/
 

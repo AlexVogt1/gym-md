@@ -303,7 +303,7 @@ def main(lvl, config, steps, log_dir):
     else: 
         # policy_kwargs = dict(activation_fn=th.nn.ReLU,net_arch=dict(pi=[32, 32], vf=[32, 32]))                                                             
         # model = PPO(policy = "MlpPolicy",env =  env,batch_size=4096,verbose=1, device="cuda", tensorboard_log=log_dir) 
-        model = PPO(policy = "MlpPolicy",env =  env,batch_size=32,verbose=1, device="cuda", tensorboard_log=log_dir)     
+        model = PPO(policy = "MlpPolicy",env =  env,batch_size=64,verbose=1, device="cuda", tensorboard_log=log_dir)     
         # model = PPO(policy = "MlpPolicy",env =  env, batch_size=1024,verbose=1, device="cuda", tensorboard_log=log_dir) 
         # model = PPO(policy = "MlpPolicy",env =  env, batch_size=256,verbose=1, device="cuda", tensorboard_log=log_dir) 
         # model = PPO(policy = "MlpPolicy",env =  env, batch_size=2048,verbose=1, device="cuda", tensorboard_log=log_dir,policy_kwargs=policy_kwargs)   
@@ -347,13 +347,13 @@ if __name__ == '__main__':
     }
     print(config)
     # return
-    log_dir = f"./logs/groupShap_32_01"
+    log_dir = f"./logs/groupShap_64_01"
     exp = f"{config['lvl']}_{config['play_style']}_{config['reward_scheme']}_{config['exp_type']}_{config['algorithm']}"
     log_dir = os.path.join(log_dir,exp)
     log_dir, name= uniquify(log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    wandb.init(project="gym-md_groupShap_32_01", sync_tensorboard=True, config=config, name=name)
+    wandb.init(project="gym-md_groupShap_64_01", sync_tensorboard=True, config=config, name=name)
     main(lvl= args.env, config =config,steps=int(1e6),log_dir=log_dir)
     wandb.finish()
     
